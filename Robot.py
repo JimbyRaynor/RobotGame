@@ -4,15 +4,28 @@ import pgzrun
 import pygame as pg
 import math
 
+import random
+
 WIDTH = 860
 HEIGHT = 540
+
+level = 10
 
 bg = pg.image.load("images/arena.png").convert()
 play_Area = Rect((150, 75), (560, 390))
 
 player = Actor("robot.png", center=(WIDTH//2, HEIGHT//2), anchor=('center', 'center'))
+
+Enemy = []
+
+for i in range(level):
+    x =  random.randint(play_Area.left,play_Area.right)
+    y =  random.randint(play_Area.top,play_Area.bottom)
+    Enemy.append(Actor("t1.png", center=(x, y), anchor=('center', 'center')))
+
 pl_movement = [0, 0]
 pl_move_speed = 2
+robotspeed = 0.2
 
 pl_rotation = [0, 0]
 
@@ -78,16 +91,29 @@ def update(dt):
         b["actor"].y += b["direction"][1] * bullet_speed
         if not b["actor"].colliderect(play_Area):
             bullets_to_remove.append(b)
+        for T1 in Enemy:
+          if b["actor"].collidepoint(T1.center):
+             bullets_to_remove.append(b)
+             Enemy.remove(T1)
     
     for b in bullets_to_remove:
         bullets.remove(b)
-
+    for T1 in Enemy:
+       if player.x < T1.x:
+           T1.x = T1.x-robotspeed
+       elif player.x > T1.x:
+           T1.x = T1.x+robotspeed   
+       if player.y > T1.y:
+           T1.y = T1.y+robotspeed
+       elif player.y < T1.y:
+           T1.y = T1.y-robotspeed
 
 def draw():
     screen.blit(bg, (0, 0))
     player.draw()
     for b in bullets:
         b["actor"].draw()
-
+    for t in Enemy:
+         t.draw()
 
 pgzrun.go()
