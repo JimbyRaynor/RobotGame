@@ -12,26 +12,30 @@ HEIGHT = 540
 level = 10
 
 bg = pg.image.load("images/arena.png").convert()
-play_Area = Rect((150, 75), (560, 390))
+play_Area = Rect((0, 0), (WIDTH, HEIGHT))
 
 player = Actor("robot.png", center=(WIDTH//2, HEIGHT//2), anchor=('center', 'center'))
 
 Enemy = []
 
-for i in range(level):
-    x =  random.randint(play_Area.left,play_Area.right)
-    y =  random.randint(play_Area.top,play_Area.bottom)
-    Enemy.append(Actor("t1.png", center=(x, y), anchor=('center', 'center')))
+def create_enemy():
+    global Enemy
+    Enemy = []
+    for i in range(level):
+      x =  random.randint(play_Area.left,play_Area.right)
+      y =  random.randint(play_Area.top,play_Area.bottom)
+      Enemy.append(Actor("t1.png", center=(x, y), anchor=('center', 'center')))
 
 pl_movement = [0, 0]
 pl_move_speed = 2
 robotspeed = 0.2
-
 pl_rotation = [0, 0]
-
+create_enemy()
 shooting = False
 
 bullets = []
+upsplit = []
+downsplit = []
 bullet_speed = 15
 fire_rate = 0.15
 fire_timer = 0
@@ -47,7 +51,7 @@ def checkInput():
      if keyboard.w: pl_rotation[1] = -1
 
 def update(dt):
-    global shooting, bullets, fire_timer
+    global shooting, bullets, fire_timer, level
 
     # Movement every frame
     checkInput()
@@ -76,6 +80,7 @@ def update(dt):
         desired_angle = (math.atan2(-pl_rotation[1], pl_rotation[0]) / (math.pi/180)) - 45
         fire_timer += dt
         if fire_timer > fire_rate:
+            sounds.s.play()
             bullet = {}
             bullet["actor"] = Actor("lazer.png", center=player.pos, anchor=('center', 'center'))
             bullet["direction"] = pl_rotation.copy()                                           
@@ -94,10 +99,14 @@ def update(dt):
         for T1 in Enemy:
           if b["actor"].collidepoint(T1.center):
              bullets_to_remove.append(b)
+             upsplit.append(Actor("t1split", center=T1.pos, anchor=('center', 'center')))
+             downsplit.append(Actor("t1split", center=T1.pos, anchor=('center', 'center')))
              Enemy.remove(T1)
+             sounds.b.play()
     
     for b in bullets_to_remove:
-        bullets.remove(b)
+        if b in bullets:
+             bullets.remove(b)
     for T1 in Enemy:
        if player.x < T1.x:
            T1.x = T1.x-robotspeed
@@ -107,13 +116,32 @@ def update(dt):
            T1.y = T1.y+robotspeed
        elif player.y < T1.y:
            T1.y = T1.y-robotspeed
+    for Ex in upsplit:
+        Ex.y = Ex.y -10
+        if not Ex.colliderect(play_Area):
+            upsplit.remove(Ex)
+    for Ex in downsplit:
+        Ex.y = Ex.y +10
+        if not Ex.colliderect(play_Area):
+            downsplit.remove(Ex)
+        
+ 
+    if len(Enemy) < 1 :
+        level = level + 1
+        create_enemy()
+        
 
 def draw():
     screen.blit(bg, (0, 0))
+    screen.draw.text("Level "+str(level),(10,10),owidth=0.5, ocolor=(255,0,0),color=(255,255,0),fontsize=300)
     player.draw()
     for b in bullets:
         b["actor"].draw()
     for t in Enemy:
          t.draw()
+    for ex in upsplit:
+        ex.draw()
+    for ex in downsplit:
+        ex.draw()
 
 pgzrun.go()
