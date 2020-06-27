@@ -99,8 +99,12 @@ def update(dt):
         for T1 in Enemy:
           if b["actor"].collidepoint(T1.center):
              bullets_to_remove.append(b)
-             upsplit.append(Actor("t1split", center=T1.pos, anchor=('center', 'center')))
-             downsplit.append(Actor("t1split", center=T1.pos, anchor=('center', 'center')))
+             vu = Actor("t1split", center=T1.pos, anchor=('center', 'center'))
+             vu.splitdirection = b["direction"]
+             upsplit.append(vu)
+             vd = Actor("t1split", center=T1.pos, anchor=('center', 'center'))
+             downsplit.append(vd)
+             vd.splitdirection = b["direction"]
              Enemy.remove(T1)
              sounds.b.play()
     
@@ -117,11 +121,13 @@ def update(dt):
        elif player.y < T1.y:
            T1.y = T1.y-robotspeed
     for Ex in upsplit:
-        Ex.y = Ex.y -10
+        Ex.y = Ex.y + 10*Ex.splitdirection[0]
+        Ex.x = Ex.x - 10*Ex.splitdirection[1]
         if not Ex.colliderect(play_Area):
             upsplit.remove(Ex)
     for Ex in downsplit:
-        Ex.y = Ex.y +10
+        Ex.y = Ex.y - 10*Ex.splitdirection[0]
+        Ex.x = Ex.x + 10*Ex.splitdirection[1]
         if not Ex.colliderect(play_Area):
             downsplit.remove(Ex)
         
