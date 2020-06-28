@@ -80,11 +80,9 @@ def update(dt):
         desired_angle = (math.atan2(-pl_rotation[1], pl_rotation[0]) / (math.pi/180)) - 45
         fire_timer += dt
         if fire_timer > fire_rate:
-            sounds.s.play()
-            bullet = {}
-            bullet["actor"] = Actor("lazer.png", center=player.pos, anchor=('center', 'center'))
-            bullet["direction"] = pl_rotation.copy()                                           
-            bullet["actor"].angle = desired_angle
+            bullet = Actor("lazer.png", center=player.pos, anchor=('center', 'center'))
+            bullet.direction = pl_rotation.copy()                                           
+            bullet.angle = desired_angle
             bullets.append(bullet)
             fire_timer = 0
             pl_rotation[1] = 0
@@ -92,21 +90,20 @@ def update(dt):
     
     bullets_to_remove = []
     for b in bullets:
-        b["actor"].x += b["direction"][0] * bullet_speed 
-        b["actor"].y += b["direction"][1] * bullet_speed
-        if not b["actor"].colliderect(play_Area):
+        b.x += b.direction[0] * bullet_speed 
+        b.y += b.direction[1] * bullet_speed
+        if not b.colliderect(play_Area):
             bullets_to_remove.append(b)
         for T1 in Enemy:
-          if b["actor"].collidepoint(T1.center):
+          if b.collidepoint(T1.center):
              bullets_to_remove.append(b)
              vu = Actor("t1split", center=T1.pos, anchor=('center', 'center'))
-             vu.splitdirection = b["direction"]
+             vu.splitdirection = b.direction
              upsplit.append(vu)
              vd = Actor("t1split", center=T1.pos, anchor=('center', 'center'))
              downsplit.append(vd)
-             vd.splitdirection = b["direction"]
+             vd.splitdirection = b.direction
              Enemy.remove(T1)
-             sounds.b.play()
     
     for b in bullets_to_remove:
         if b in bullets:
@@ -142,7 +139,7 @@ def draw():
     screen.draw.text("Level "+str(level),(10,10),owidth=0.5, ocolor=(255,0,0),color=(255,255,0),fontsize=300)
     player.draw()
     for b in bullets:
-        b["actor"].draw()
+        b.draw()
     for t in Enemy:
          t.draw()
     for ex in upsplit:
